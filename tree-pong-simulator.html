@@ -368,22 +368,22 @@
             <h2>⚙️ Opponent's Skills (Set Their Accuracy)</h2>
             <div class="controls-row">
                 <div class="slider-group">
-                    <label>🎯 Sink Accuracy (Ball goes IN the cup)</label>
-                    <div class="slider-container">
-                        <span>Drunk 🥴</span>
-                        <input type="range" id="sinkAccuracy" min="0" max="100" value="5">
-                        <span>Pro 🎯</span>
-                        <div class="value-display" id="sinkValue">5%</div>
-                    </div>
-                </div>
-
-                <div class="slider-group">
-                    <label>👊 Hit Accuracy (Ball hits the cup)</label>
+                    <label>👊 Hit Accuracy (% of shots that land in ANY cup)</label>
                     <div class="slider-container">
                         <span>Blind 🙈</span>
                         <input type="range" id="hitAccuracy" min="0" max="100" value="10">
                         <span>Sniper 🎯</span>
                         <div class="value-display" id="hitValue">10%</div>
+                    </div>
+                </div>
+
+                <div class="slider-group">
+                    <label>🎯 Sink Rate (% of hits that go IN vs rim)</label>
+                    <div class="slider-container">
+                        <span>Rim 🏀</span>
+                        <input type="range" id="sinkAccuracy" min="0" max="100" value="5">
+                        <span>Splash 💦</span>
+                        <div class="value-display" id="sinkValue">5%</div>
                     </div>
                 </div>
 
@@ -417,20 +417,30 @@
                     <span>Sink (full beer)</span>
                 </div>
             </div>
-            <div style="text-align: center; margin-top: 15px;">
-                <button id="swingBtn">🏓 Begin!</button>
-                <button id="autoPlayBtn">▶️ Auto Play</button>
+            <div style="text-align: center; margin-top: 15px; font-family: 'Courier New', monospace;">
+                <span style="color: #00ff00;">Hit: <span id="liveHitAccuracy">10</span>%</span>
+                <span style="margin: 0 15px; color: #666;">|</span>
+                <span style="color: #ffcc00;">Sink: <span id="liveSinkAccuracy">5</span>%</span>
             </div>
         </div>
 
         <!-- Heat Map Panel -->
         <div class="panel">
-            <h2>🔥 Monte Carlo Heat Map (50 Shots)</h2>
+            <h2>🔥 Monte Carlo Heat Map (<span id="simCountDisplay">50</span> Shots)</h2>
             <canvas id="heatmapCanvas" width="400" height="400"></canvas>
-            <div style="text-align: center; margin-top: 15px;">
-                <button id="monteCarloBtn">🎲 Run 50 Simulations</button>
+            <div class="slider-group" style="margin: 15px 0;">
+                <label>🎲 Simulation Count</label>
+                <div class="slider-container">
+                    <span>10</span>
+                    <input type="range" id="simCount" min="10" max="500" step="10" value="50">
+                    <span>500</span>
+                    <div class="value-display" id="simCountValue">50</div>
+                </div>
             </div>
-            <div class="stats-grid" id="simStats">
+            <div style="text-align: center; margin-top: 10px;">
+                <button id="monteCarloBtn">🎲 Run Simulations</button>
+            </div>
+            <div class="stats-grid" id="simStats" style="grid-template-columns: repeat(5, 1fr);">
                 <div class="stat-box">
                     <div class="stat-value" id="sinkCount">0</div>
                     <div class="stat-label">Sinks</div>
@@ -444,44 +454,48 @@
                     <div class="stat-label">Misses</div>
                 </div>
                 <div class="stat-box">
+                    <div class="stat-value" id="cupsRemoved">0/11</div>
+                    <div class="stat-label">Cups Out</div>
+                </div>
+                <div class="stat-box">
                     <div class="stat-value" id="beerDrank">0</div>
-                    <div class="stat-label">Beers Drank</div>
+                    <div class="stat-label">Beers</div>
                 </div>
             </div>
 
         </div>
 
-        <!-- Decision Calculator - SEPARATE PANEL BELOW MONTE CARLO -->
-        <div class="panel">
+        <!-- Decision Calculator - Side-by-side layout -->
+        <div class="panel full-width">
             <h2>🧠 Double-Fault Penalty Calculator</h2>
-            <p class="explanation">
-                <strong>The Scenario:</strong> Opponent missed two serves (ball off table twice). YOU choose their
-                punishment:
-            </p>
-            <ul class="explanation" style="margin: 10px 0 10px 20px; color: #ccc;">
-                <li><strong>Option A:</strong> Remove a half-full cup entirely (fewer targets)</li>
-                <li><strong>Option B:</strong> Wound a full cup to half (cup stays, but damaged)</li>
-            </ul>
-
-            <div style="text-align: center; margin: 20px 0;">
-                <button id="analyzeBtn">🤔 Calculate Optimal Strategy</button>
-            </div>
-
-            <div class="decision-box" id="decisionResult">
-                <p>Click the button above to analyze optimal strategy!</p>
-            </div>
-
-            <div class="drunk-meter">
-                <h3>🍺 Projected Drunkeness Level</h3>
-                <div class="drunk-bar">
-                    <div class="drunk-fill" id="drunkFill" style="width: 10%;"></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+                <!-- Left: Explanation -->
+                <div>
+                    <p class="explanation">
+                        <strong>The Scenario:</strong> Opponent missed two serves (ball off table twice). YOU choose their
+                        punishment:
+                    </p>
+                    <ul class="explanation" style="margin: 10px 0 10px 20px; color: #ccc;">
+                        <li><strong>Option A:</strong> Remove a half-full cup entirely (fewer targets)</li>
+                        <li><strong>Option B:</strong> Wound a full cup to half (cup stays, but damaged)</li>
+                    </ul>
+                    <div class="drunk-meter" style="margin-top: 20px;">
+                        <h3>🍺 Projected Drunkeness Level</h3>
+                        <div class="drunk-bar">
+                            <div class="drunk-fill" id="drunkFill" style="width: 10%;"></div>
+                        </div>
+                        <div class="drunk-labels">
+                            <span>Sober 😇</span>
+                            <span>Tipsy 😊</span>
+                            <span>Drunk 🥴</span>
+                            <span>Wasted 🤪</span>
+                            <span>Legend 👑</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="drunk-labels">
-                    <span>Sober 😇</span>
-                    <span>Tipsy 😊</span>
-                    <span>Drunk 🥴</span>
-                    <span>Wasted 🤪</span>
-                    <span>Legend 👑</span>
+                <!-- Right: Decision Result (auto-calculated) -->
+                <div class="decision-box" id="decisionResult" style="margin-top: 0;">
+                    <p style="color: #aaa;">Calculating optimal strategy...</p>
                 </div>
             </div>
         </div>
@@ -505,25 +519,48 @@
         <div class="panel full-width">
             <h2>📊 The Math Behind the Madness</h2>
             <div class="explanation" id="mathExplanation">
-                <p><strong>The Two Schools of Thought:</strong></p>
+                <p><strong>The Two Strategies:</strong></p>
 
-                <p><strong style="color: #4ecdc4;">🥤 School A: "Remove the Half Cup"</strong></p>
-                <ul style="margin: 10px 0 10px 20px;">
-                    <li>Fewer cups on the table = smaller target area</li>
-                    <li>Opponent has fewer things to potentially hit</li>
-                    <li>Good against HIGH accuracy opponents</li>
-                    <li>Downside: You only saved 0.5 beers worth right now</li>
-                </ul>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 15px 0;">
+                    <div style="border: 1px solid #00ff00; padding: 15px;">
+                        <p><strong style="color: #00ff00;">🥤 Option A: Remove the Half Cup</strong></p>
+                        <ul style="margin: 10px 0 10px 20px;">
+                            <li>10 cups remain (down from 11)</li>
+                            <li>~9% smaller target area</li>
+                            <li>You save 0.5 beers immediately</li>
+                            <li>Reduces ALL future hit probability</li>
+                        </ul>
+                    </div>
+                    <div style="border: 1px solid #ff6600; padding: 15px;">
+                        <p><strong style="color: #ff6600;">🍺 Option B: Wound the Full Cup</strong></p>
+                        <ul style="margin: 10px 0 10px 20px;">
+                            <li>11 cups remain (one wounded)</li>
+                            <li>Full target area preserved</li>
+                            <li>Opponent drinks 0.5 NOW</li>
+                            <li>Wounded cup clears on next hit</li>
+                        </ul>
+                    </div>
+                </div>
 
-                <p><strong style="color: #ff6b6b;">🍺 School B: "Wound the Full Cup"</strong></p>
-                <ul style="margin: 10px 0 10px 20px;">
-                    <li>More cups on table = more surface area = more likely hits</li>
-                    <li>BUT that wounded cup is now 1 hit from removal (quick clear)</li>
-                    <li>Good against LOW accuracy opponents (they'll miss anyway)</li>
-                    <li>Bonus: You forced them to drink a full half beer NOW</li>
-                </ul>
+                <div style="border: 2px solid #ffcc00; padding: 15px; margin: 20px 0; background: rgba(255, 204, 0, 0.05);">
+                    <p><strong style="color: #ffcc00;">🎯 The Counterintuitive Truth:</strong></p>
+                    <p style="margin-top: 10px;">
+                        Option B ("wound the cup") <em>sounds</em> clever — you get guaranteed beer NOW and the wounded cup
+                        clears faster. But the math almost <strong>never</strong> favors it.
+                    </p>
+                    <p style="margin-top: 10px;">
+                        <strong>Why?</strong> Having 11 targets vs 10 is a ~10% increase in surface area. Even against
+                        terrible players, that extra cup gets hit occasionally. The 0.5 beer "penalty" you extracted
+                        doesn't offset the increased exposure over 50+ swings.
+                    </p>
+                    <p style="margin-top: 10px;">
+                        <strong>The only scenario where B wins:</strong> At extremely low accuracy (2-3% hit rate),
+                        the difference becomes statistically negligible — flip a coin. But if there's ANY meaningful
+                        accuracy, Option A wins.
+                    </p>
+                </div>
 
-                <p><strong>The Key Insight:</strong> It depends on your OPPONENT'S skills, not yours!</p>
+                <p><strong>Bottom Line:</strong> The conventional wisdom is correct. <span style="color: #00ff00;">Always remove the cup.</span></p>
                 <p id="personalizedAdvice"></p>
             </div>
         </div>
@@ -559,18 +596,16 @@
         // ============================================
         // EVENT LISTENERS (Safe, no inline handlers)
         // ============================================
-        document.getElementById('swingBtn').addEventListener('click', swingBall);
-        document.getElementById('autoPlayBtn').addEventListener('click', toggleAutoPlay);
         document.getElementById('monteCarloBtn').addEventListener('click', runMonteCarlo);
-        document.getElementById('analyzeBtn').addEventListener('click', analyzeDecision);
+        document.getElementById('simCount').addEventListener('input', updateSimCount);
         document.getElementById('sinkAccuracy').addEventListener('input', updateSliders);
         document.getElementById('hitAccuracy').addEventListener('input', updateSliders);
         document.getElementById('cupSize').addEventListener('input', updateSliders);
 
         // ============================================
         // PYRAMID CUP POSITIONS (normalized 0-1)
-        // Layout: 1-2-3-4-1 (front to back)
-        // Cups touch in a proper pyramid formation
+        // Layout: Stump at bottom (edge of table), pyramid peak points toward center
+        // Stump -> 4 cups (base) -> 3 -> 2 -> 1 cup (peak pointing to center)
         // ============================================
         const CUP_RADIUS = 0.048; // Reduced to prevent visual overlap from line widths/glows
 
@@ -585,33 +620,33 @@
             const rowHeight = d * 0.866; // sqrt(3)/2 for equilateral triangle packing
 
             const centerX = 0.5;
-            const startY = 0.08; // Front tip of pyramid
+            // Stump at bottom edge of table
+            const stumpY = 0.92;
 
-            // Row 1 (front/tip): 1 cup
-            cups.push({ x: centerX, y: startY, radius: r, hits: 0 });
+            // Stump: the "trunk" of the tree, touching the edge
+            cups.push({ x: centerX, y: stumpY, radius: r, hits: 0, isStump: true });
 
-            // Row 2: 2 cups
-            const row2Y = startY + rowHeight;
-            cups.push({ x: centerX - r, y: row2Y, radius: r, hits: 0 });
-            cups.push({ x: centerX + r, y: row2Y, radius: r, hits: 0 });
+            // Row 4 (base of pyramid, 4 cups) - just above stump, touching middle two
+            const row4Y = stumpY - rowHeight;
+            cups.push({ x: centerX - d - r, y: row4Y, radius: r, hits: 0 });
+            cups.push({ x: centerX - r, y: row4Y, radius: r, hits: 0 }); // touches stump
+            cups.push({ x: centerX + r, y: row4Y, radius: r, hits: 0 }); // touches stump
+            cups.push({ x: centerX + d + r, y: row4Y, radius: r, hits: 0 });
 
             // Row 3: 3 cups
-            const row3Y = startY + rowHeight * 2;
+            const row3Y = row4Y - rowHeight;
             cups.push({ x: centerX - d, y: row3Y, radius: r, hits: 0 });
             cups.push({ x: centerX, y: row3Y, radius: r, hits: 0 });
             cups.push({ x: centerX + d, y: row3Y, radius: r, hits: 0 });
 
-            // Row 4 (back of pyramid): 4 cups
-            const row4Y = startY + rowHeight * 3;
-            cups.push({ x: centerX - d - r, y: row4Y, radius: r, hits: 0 });
-            cups.push({ x: centerX - r, y: row4Y, radius: r, hits: 0 });
-            cups.push({ x: centerX + r, y: row4Y, radius: r, hits: 0 });
-            cups.push({ x: centerX + d + r, y: row4Y, radius: r, hits: 0 });
+            // Row 2: 2 cups
+            const row2Y = row3Y - rowHeight;
+            cups.push({ x: centerX - r, y: row2Y, radius: r, hits: 0 });
+            cups.push({ x: centerX + r, y: row2Y, radius: r, hits: 0 });
 
-            // Stump: positioned to touch the two middle cups of row 4 (at centerX - r and centerX + r)
-            // For tangent touching: vertical distance = sqrt((2r)² - r²) = sqrt(3)*r = rowHeight
-            const stumpY = row4Y + rowHeight;
-            cups.push({ x: centerX, y: stumpY, radius: r, hits: 0, isStump: true });
+            // Row 1 (tip/peak): 1 cup - pointing toward center of table
+            const row1Y = row2Y - rowHeight;
+            cups.push({ x: centerX, y: row1Y, radius: r, hits: 0 });
 
             return cups;
         }
@@ -628,45 +663,72 @@
         }
 
         function updateSliders() {
-            document.getElementById('sinkValue').textContent = document.getElementById('sinkAccuracy').value + '%';
-            document.getElementById('hitValue').textContent = document.getElementById('hitAccuracy').value + '%';
+            const hitVal = document.getElementById('hitAccuracy').value;
+            const sinkVal = document.getElementById('sinkAccuracy').value;
+
+            document.getElementById('sinkValue').textContent = sinkVal + '%';
+            document.getElementById('hitValue').textContent = hitVal + '%';
             document.getElementById('cupValue').textContent = document.getElementById('cupSize').value + '%';
+
+            // Update live display on game canvas
+            document.getElementById('liveHitAccuracy').textContent = hitVal;
+            document.getElementById('liveSinkAccuracy').textContent = sinkVal;
 
             // Update drunk meter based on hit accuracy (joke: better aim = more drunk)
             const drunkLevel = Math.min(100,
-                (parseInt(document.getElementById('hitAccuracy').value) * 0.7) +
-                (parseInt(document.getElementById('sinkAccuracy').value) * 0.3));
+                (parseInt(hitVal) * 0.7) + (parseInt(sinkVal) * 0.3));
             document.getElementById('drunkFill').style.width = drunkLevel + '%';
+
+            // Auto-calculate optimal strategy on every slider change
+            analyzeDecision();
+        }
+
+        function updateSimCount() {
+            const count = document.getElementById('simCount').value;
+            document.getElementById('simCountValue').textContent = count;
+            document.getElementById('simCountDisplay').textContent = count;
         }
 
         // ============================================
         // SIMULATION LOGIC
         // ============================================
-        function simulateShot(skills) {
-            // At 100% hit accuracy, we always aim at a cup
-            // At lower accuracy, shots spread out more
+        function simulateShot(skills, activeCups) {
+            // NEW MODEL:
+            // - hitAccuracy = probability of landing inside ANY cup
+            // - If we "hit", place ball inside targeted cup's radius
+            // - If we "miss", place ball randomly on table (not in any cup)
 
-            // Get cup positions to aim at
-            const cups = getCupPositions();
-            const targetCup = cups[Math.floor(Math.random() * cups.length)];
+            const cups = activeCups || getCupPositions();
+            if (cups.length === 0) return { x: 0.5, y: 0.5 };
 
-            // Calculate spread based on accuracy (higher accuracy = less spread)
-            // At 100% accuracy, spread is minimal (0.02)
-            // At 0% accuracy, spread is large (0.4)
-            const baseSpread = 0.02;
-            const maxSpread = 0.4;
-            const spread = baseSpread + (1 - skills.hitAccuracy) * (maxSpread - baseSpread);
+            // First: does the shot hit a cup at all?
+            const hitsAnyCup = Math.random() < skills.hitAccuracy;
 
-            // Box-Muller transform for Gaussian distribution around target
-            const u1 = Math.random();
-            const u2 = Math.random();
-            const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-            const z1 = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2);
-
-            const x = targetCup.x + z0 * spread;
-            const y = targetCup.y + z1 * spread;
-
-            return { x: Math.max(0, Math.min(1, x)), y: Math.max(0, Math.min(1, y)) };
+            if (hitsAnyCup) {
+                // Shot lands inside a cup - pick a random target cup
+                const targetCup = cups[Math.floor(Math.random() * cups.length)];
+                // Place ball randomly inside the cup radius
+                const angle = Math.random() * 2 * Math.PI;
+                const dist = Math.random() * targetCup.radius * 0.9; // Stay inside
+                return {
+                    x: targetCup.x + Math.cos(angle) * dist,
+                    y: targetCup.y + Math.sin(angle) * dist
+                };
+            } else {
+                // Shot misses all cups - land somewhere on table but NOT in a cup
+                let x, y, inCup;
+                do {
+                    x = 0.1 + Math.random() * 0.8; // Stay on table
+                    y = 0.3 + Math.random() * 0.6;
+                    // Check we're not accidentally in a cup
+                    inCup = cups.some(cup => {
+                        const dx = x - cup.x;
+                        const dy = y - cup.y;
+                        return Math.sqrt(dx * dx + dy * dy) <= cup.radius;
+                    });
+                } while (inCup && cups.length < 20); // Safety limit
+                return { x, y };
+            }
         }
 
         function checkHit(position, cups, skills) {
@@ -687,14 +749,12 @@
 
             if (!closestCup) return { type: 'miss', cup: null };
 
-            // Check if we're inside the cup radius
+            // Check if we're inside the cup radius (a "hit" on the cup)
             if (closestDist <= closestCup.radius) {
-                // Inside the cup - could be a sink or a hit
-                // Sink chance based on how centered + sink accuracy
-                const centeredness = 1 - (closestDist / closestCup.radius);
-                const sinkChance = centeredness * skills.sinkAccuracy;
-
-                if (Math.random() < sinkChance) {
+                // Ball landed in cup - sink or hit based purely on sinkAccuracy
+                // At 100% sink accuracy, EVERY cup hit is a sink
+                // At 0% sink accuracy, every cup hit is just a rim hit
+                if (Math.random() < skills.sinkAccuracy) {
                     return { type: 'sink', cup: closestCup };
                 } else {
                     return { type: 'hit', cup: closestCup };
@@ -1064,16 +1124,10 @@
             }, 200);
         }
 
-        function toggleAutoPlay() {
-            autoPlaying = !autoPlaying;
-            const btn = document.getElementById('autoPlayBtn');
-            if (autoPlaying) {
-                btn.textContent = '⏸️ Stop';
-                autoPlayInterval = setInterval(swingBall, 2500);
-            } else {
-                btn.textContent = '▶️ Auto Play';
-                clearInterval(autoPlayInterval);
-            }
+        function startAutoPlay() {
+            // Auto-play continuously
+            autoPlaying = true;
+            autoPlayInterval = setInterval(swingBall, 2000);
         }
 
         // ============================================
@@ -1081,13 +1135,27 @@
         // ============================================
         function runMonteCarlo() {
             const skills = getSkills();
-            const cups = getCupPositions();
-            heatmapData = [];
-            simResults = { sinks: 0, hits: 0, misses: 0, totalBeer: 0 };
+            const simCount = parseInt(document.getElementById('simCount').value);
 
-            for (let i = 0; i < 50; i++) {
-                const position = simulateShot(skills);
-                const result = checkHit(position, cups, skills);
+            // Track cup state - cups can be removed when sunk
+            const cups = getCupPositions();
+            cups.forEach(c => c.removed = false); // Track if cup has been sunk/removed
+
+            heatmapData = [];
+            simResults = { sinks: 0, hits: 0, misses: 0, totalBeer: 0, cupsRemoved: 0 };
+
+            for (let i = 0; i < simCount; i++) {
+                // Only target cups that haven't been removed
+                const activeCups = cups.filter(c => !c.removed);
+
+                // If all 11 cups are sunk, game is over - opponent wins!
+                if (activeCups.length === 0) {
+                    break;
+                }
+
+                // Only aim at active cups (not removed ones)
+                const position = simulateShot(skills, activeCups);
+                const result = checkHit(position, activeCups, skills);
 
                 heatmapData.push({
                     x: position.x,
@@ -1098,19 +1166,37 @@
                 if (result.type === 'sink') {
                     simResults.sinks++;
                     simResults.totalBeer += 1;
+                    // Remove the cup from play!
+                    if (result.cup) {
+                        result.cup.removed = true;
+                        simResults.cupsRemoved++;
+                    }
                 } else if (result.type === 'hit') {
                     simResults.hits++;
                     simResults.totalBeer += 0.5;
+                    // Track hits on cups - 2 hits removes a cup
+                    if (result.cup) {
+                        result.cup.hits++;
+                        if (result.cup.hits >= 2) {
+                            result.cup.removed = true;
+                            simResults.cupsRemoved++;
+                        }
+                    }
                 } else {
                     simResults.misses++;
                 }
+
+                // Cap beer at 11 - can't drink more than all the cups!
+                if (simResults.totalBeer > 11) {
+                    simResults.totalBeer = 11;
+                }
             }
 
-            drawHeatmap();
+            drawHeatmap(cups); // Pass cups to show which are removed
             updateStats();
         }
 
-        function drawHeatmap() {
+        function drawHeatmap(cupsWithState) {
             const ctx = heatmapCtx;
             const w = heatmapCanvas.width;
             const h = heatmapCanvas.height;
@@ -1118,10 +1204,23 @@
             // Draw table
             drawTable(ctx, w, h);
 
-            // Draw cups
-            const cups = getCupPositions();
+            // Draw cups - use passed state if available, otherwise get fresh positions
+            const cups = cupsWithState || getCupPositions();
             cups.forEach(cup => {
-                drawCup(ctx, cup.x * w, cup.y * h, cup.radius, false, cup.isStump);
+                if (cup.removed) {
+                    // Draw removed cups as dim outlines
+                    ctx.globalAlpha = 0.2;
+                    ctx.strokeStyle = '#444';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([3, 3]);
+                    ctx.beginPath();
+                    ctx.arc(cup.x * w, cup.y * h, cup.radius * 400, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.globalAlpha = 1;
+                } else {
+                    drawCup(ctx, cup.x * w, cup.y * h, cup.radius, false, cup.isStump);
+                }
             });
 
             // Draw heat map points
@@ -1167,6 +1266,11 @@
             document.getElementById('hitCount').textContent = simResults.hits;
             document.getElementById('missCount').textContent = simResults.misses;
             document.getElementById('beerDrank').textContent = simResults.totalBeer.toFixed(1);
+            // Show cups removed if available
+            const cupsRemovedEl = document.getElementById('cupsRemoved');
+            if (cupsRemovedEl && simResults.cupsRemoved !== undefined) {
+                cupsRemovedEl.textContent = simResults.cupsRemoved + '/11';
+            }
         }
 
         // ============================================
@@ -1175,19 +1279,27 @@
         function analyzeDecision() {
             const skills = getSkills();
             const simCount = 2000;
-            const swingsPerGame = 15; // Approximate swings remaining
+            const swingsPerGame = 50; // Typical game has ~50 swings
 
             // ===== SCENARIO A: Remove the half cup =====
-            // Result: 10 cups instead of 11, all full (need 2 hits each)
+            // Result: 10 cups instead of 11 (one removed entirely)
             let scenarioA_beersDrank = 0;
+            let scenarioA_wins = 0; // Track how often opponent wins (clears all cups)
             for (let i = 0; i < simCount; i++) {
-                const cups = getCupPositions().slice(0, -1); // Remove stump (one less cup)
+                const cups = getCupPositions().slice(1); // Remove one cup (start with 10)
                 cups.forEach(c => c.hits = 0);
                 let beerThisGame = 0;
 
                 for (let t = 0; t < swingsPerGame; t++) {
-                    const position = simulateShot(skills);
-                    const result = checkHit(position, cups.filter(c => c.hits < 2), skills);
+                    const activeCups = cups.filter(c => c.hits < 2);
+                    // Game over if all cups removed - opponent wins!
+                    if (activeCups.length === 0) {
+                        scenarioA_wins++;
+                        break;
+                    }
+
+                    const position = simulateShot(skills, activeCups);
+                    const result = checkHit(position, activeCups, skills);
 
                     if (result.type === 'sink') {
                         beerThisGame += 1;
@@ -1197,13 +1309,15 @@
                         result.cup.hits += 1;
                     }
                 }
-                scenarioA_beersDrank += beerThisGame;
+                // Cap at 10 beers (10 cups in scenario A)
+                scenarioA_beersDrank += Math.min(beerThisGame, 10);
             }
             scenarioA_beersDrank /= simCount;
 
             // ===== SCENARIO B: Wound a full cup to half =====
             // Result: 11 cups, but one starts with 1 hit (wounded)
             let scenarioB_beersDrank = 0;
+            let scenarioB_wins = 0; // Track how often opponent wins
             for (let i = 0; i < simCount; i++) {
                 const cups = getCupPositions();
                 cups.forEach(c => c.hits = 0);
@@ -1211,10 +1325,14 @@
                 let beerThisGame = 0.5; // They already drank 0.5 from the wound
 
                 for (let t = 0; t < swingsPerGame; t++) {
-                    const position = simulateShot(skills);
                     const activeCups = cups.filter(c => c.hits < 2);
-                    if (activeCups.length === 0) break;
+                    // Game over if all 11 cups removed - opponent wins!
+                    if (activeCups.length === 0) {
+                        scenarioB_wins++;
+                        break;
+                    }
 
+                    const position = simulateShot(skills, activeCups);
                     const result = checkHit(position, activeCups, skills);
 
                     if (result.type === 'sink') {
@@ -1225,7 +1343,8 @@
                         result.cup.hits += 1;
                     }
                 }
-                scenarioB_beersDrank += beerThisGame;
+                // Cap at 11 beers max (11 cups in scenario B)
+                scenarioB_beersDrank += Math.min(beerThisGame, 11);
             }
             scenarioB_beersDrank /= simCount;
 
@@ -1328,7 +1447,7 @@
         // INITIALIZATION
         // ============================================
         function init() {
-            updateSliders();
+            updateSliders(); // Also triggers analyzeDecision()
             drawGame();
 
             // Initial heatmap
@@ -1340,11 +1459,8 @@
                     cup.radius, false, cup.isStump);
             });
 
-            ctx.font = '16px Comic Sans MS';
-            ctx.fillStyle = '#fff';
-            ctx.textAlign = 'center';
-            ctx.fillText('Click "Run 50 Simulations" to see the magic! ✨',
-                heatmapCanvas.width / 2, heatmapCanvas.height - 20);
+            // Start continuous auto-play animation
+            startAutoPlay();
         }
 
         init();
